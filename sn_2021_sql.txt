@@ -1,0 +1,158 @@
+select * from SaobracajneNezgode2021
+
+--Car accidents by city in Serbia
+select 
+	sn.Grad
+	, count(sn.VrstaNezgode) as UkupneSaobracajneNezgode2021PoGradovima
+from SaobracajneNezgode2021 sn
+group by sn.Grad
+order by 2 desc
+
+-- Car accidents by county and city
+select 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, count(sn.VrstaNezgode) as UkupneSaobracajneNezgode2021PoGradovima
+from SaobracajneNezgode2021 sn
+group by sn.Grad, sn.Opstina, sn.VrstaNezgode
+order by 1, 2
+
+-- filter by time
+
+select 
+	sn.Grad
+	, sn.Opstina
+	, sn.Datum
+	, sn.VrstaNezgode
+	-- , count(sn.VrstaNezgode) as 
+	from SaobracajneNezgode2021 sn
+where cast(sn.Datum as time) 
+	between '07:00' and '09:00'
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.Datum
+	, sn.VrstaNezgode
+order by 3
+
+-- car accidents in morning from 7-9
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+	, count(sn.VrstaNezgode) as 'Ukupno nezgode'
+from SaobracajneNezgode2021 as sn
+where cast(sn.Datum as time) between '07:00' and '09:00'
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+order by 1, 2
+
+-- car accidents in morning from 15-17pm
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+	, count(sn.VrstaNezgode) as 'Ukupno nezgode'
+from SaobracajneNezgode2021 as sn
+where cast(sn.Datum as time) between '15:00' and '17:00'
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+order by 1, 2
+
+-- car accidents all other times except going or leaving work
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+	, count(sn.VrstaNezgode) as 'Ukupno nezgode'
+from SaobracajneNezgode2021 as sn
+where not cast(sn.Datum as time) between '07:00' and '09:00'
+	and not cast(sn.Datum as time) between '15:00' and '17:00'
+group by
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	-- , sn.Datum
+order by 1, 2
+
+
+-- percentage difference between times (going to work from 7 - 9)
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, cast(count(sn.VrstaNezgode) as real) as UkupneNezgode
+	, test.test_UkupneNezgode
+	, cast(count(sn.VrstaNezgode) as real) / test.test_UkupneNezgode * 100 as ratio
+from SaobracajneNezgode2021 as sn, test
+where cast(sn.Datum as time) between '07:00' and '09:00'
+	and test.test_Opstina = sn.Opstina 
+	and sn.VrstaNezgode = test.test_VrstaNezgode
+	and sn.Grad = test.test_grad
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, test.test_UkupneNezgode
+	--, sn.Datum
+order by 1,2,3
+
+-- percentage difference between times (going to work from 15 - 17)
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, cast(count(sn.VrstaNezgode) as real) as UkupneNezgode
+	, test.test_UkupneNezgode
+	, cast(count(sn.VrstaNezgode) as real) / test.test_UkupneNezgode * 100 as ratio
+from SaobracajneNezgode2021 as sn, test
+where cast(sn.Datum as time) between '15:00' and '17:00'
+	and test.test_Opstina = sn.Opstina 
+	and sn.VrstaNezgode = test.test_VrstaNezgode
+	and sn.Grad = test.test_grad
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, test.test_UkupneNezgode
+	--, sn.Datum
+order by 1,2,3
+
+-- percentage difference between times everything except
+-- going or leaving work
+
+select
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, cast(count(sn.VrstaNezgode) as real) as UkupneNezgode
+	, test.test_UkupneNezgode
+	, cast(count(sn.VrstaNezgode) as real) / test.test_UkupneNezgode * 100 as ratio
+from SaobracajneNezgode2021 as sn, test
+where not cast(sn.Datum as time) between '07:00' and '09:00'
+	and not cast(sn.Datum as time) between '15:00' and '17:00'
+	and test.test_Opstina = sn.Opstina 
+	and sn.VrstaNezgode = test.test_VrstaNezgode
+	and sn.Grad = test.test_grad
+group by 
+	sn.Grad
+	, sn.Opstina
+	, sn.VrstaNezgode
+	, test.test_UkupneNezgode
+	--, sn.Datum
+order by 1,2,3
